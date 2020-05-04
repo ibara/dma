@@ -134,6 +134,13 @@ set_from(struct queue *queue, const char *osender)
 	return (sender);
 }
 
+static void
+set_subject(struct queue *queue, char *subject)
+{
+	if (subject != NULL)
+		queue->subject = strdup(subject);
+}
+
 static int
 read_aliases(void)
 {
@@ -422,6 +429,7 @@ main(int argc, char **argv)
 {
 	struct sigaction act;
 	char *sender = NULL;
+	char *subject = NULL;
 	struct queue queue;
 	int i, ch;
 	int nodot = 0, showq = 0, queue_only = 0;
@@ -474,7 +482,7 @@ main(int argc, char **argv)
 	}
 
 	opterr = 0;
-	while ((ch = getopt(argc, argv, ":A:b:B:C:d:Df:F:h:iL:N:no:O:q:r:R:tUV:vX:")) != -1) {
+	while ((ch = getopt(argc, argv, ":A:b:B:C:d:Df:F:h:iL:N:no:O:q:r:R:s:tUV:vX:")) != -1) {
 		switch (ch) {
 		case 'A':
 			/* -AX is being ignored, except for -A{c,m} */
@@ -523,6 +531,10 @@ main(int argc, char **argv)
 			if (optarg && *optarg == '-')
 				optind--;
 			doqueue = 1;
+			break;
+
+		case 's':
+			subject = optarg;
 			break;
 
 		/* Ignored options */
@@ -598,6 +610,8 @@ skipopts:
 
 	if ((sender = set_from(&queue, sender)) == NULL)
 		errlog(EX_SOFTWARE, NULL);
+
+	set_subject(&queue, subject);
 
 	if (newspoolf(&queue) != 0)
 		errlog(EX_CANTCREAT, "can not create temp file in `%s'", config.spooldir);

@@ -125,6 +125,7 @@ struct queue {
 	FILE *mailf;
 	char *tmpf;
 	const char *sender;
+	const char *subject;
 };
 
 struct config {

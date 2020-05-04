@@ -352,6 +352,7 @@ readmail(struct queue *queue, int nodot, int recp_from_header)
 	size_t error;
 	int had_headers = 0;
 	int had_from = 0;
+	int had_subject = 0;
 	int had_messagid = 0;
 	int had_date = 0;
 	int had_first_line = 0;
@@ -417,6 +418,8 @@ readmail(struct queue *queue, int nodot, int recp_from_header)
 				had_from = 1;
 			else if (strprefixcmp(line, "Bcc:") == 0)
 				nocopy = 1;
+			else if (strprefixcmp(line, "Subject:") == 0)
+				had_subject = 1;
 
 			if (parse_state.state != NONE) {
 				if (parse_addrs(&parse_state, line, queue) < 0) {
@@ -439,7 +442,7 @@ readmail(struct queue *queue, int nodot, int recp_from_header)
 
 		if (strcmp(line, "\n") == 0 && !had_headers) {
 			had_headers = 1;
-			while (!had_date || !had_messagid || !had_from) {
+			while (!had_date || !had_messagid || !had_from || (!had_subject && queue->subject != NULL)) {
 				if (!had_date) {
 					had_date = 1;
 					snprintf(line, sizeof(line), "Date: %s\n", rfc822date());
@@ -454,6 +457,9 @@ readmail(struct queue *queue, int nodot, int recp_from_header)
 				} else if (!had_from) {
 					had_from = 1;
 					snprintf(line, sizeof(line), "From: <%s>\n", queue->sender);
+				} else if (!had_subject && queue->subject != NULL) {
+					had_subject = 1;
+					snprintf(line, sizeof(line), "Subject: %s\n", queue->subject);
 				}
 				if (fwrite(line, strlen(line), 1, queue->mailf) != 1)
 					return (-1);

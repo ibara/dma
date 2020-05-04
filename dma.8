@@ -45,6 +45,7 @@
 .Op Fl L Ar tag
 .Op Fl o Ns Ar option
 .Op Fl r Ar sender
+.Op Fl s Ar subject
 .Op Fl q Ns Op Ar arg
 .Op Ar recipient ...
 .Sh DESCRIPTION
@@ -115,6 +116,8 @@ The argument is optional and ignored.
 .It Fl r Ar sender
 Same as
 .Fl f .
+.It Fl s Ar subject
+Specify subject on command line (quote subjects containing spaces).
 .It Fl t
 Obtain recipient addresses from the message header.
 .Nm
